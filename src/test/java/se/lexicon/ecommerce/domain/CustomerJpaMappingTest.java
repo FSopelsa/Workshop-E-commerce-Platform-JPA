@@ -54,4 +54,27 @@ class CustomerJpaMappingTest {
         assertThat(storedCustomer.getProfile().getCustomer().getEmail())
                 .isEqualTo("grace.hopper@example.com");
     }
+
+    @Test
+    void keepsBothSidesConsistentWhenProfileIsReplacedOrCleared() {
+        Customer customer = new Customer(
+                "Ada",
+                "Lovelace",
+                "ada.profile@example.com",
+                new Address("Sveavägen 10", "Stockholm", "111 57")
+        );
+        UserProfile firstProfile = new UserProfile("ada-first", "+46701234567", "First profile");
+        UserProfile secondProfile = new UserProfile("ada-second", "+46707654321", "Second profile");
+
+        customer.assignProfile(firstProfile);
+        customer.assignProfile(secondProfile);
+
+        assertThat(firstProfile.getCustomer()).isNull();
+        assertThat(secondProfile.getCustomer()).isSameAs(customer);
+
+        customer.assignProfile(null);
+
+        assertThat(customer.getProfile()).isNull();
+        assertThat(secondProfile.getCustomer()).isNull();
+    }
 }
