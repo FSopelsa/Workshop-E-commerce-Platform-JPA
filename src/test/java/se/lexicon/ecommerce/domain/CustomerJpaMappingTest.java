@@ -32,4 +32,26 @@ class CustomerJpaMappingTest {
         assertThat(storedCustomer.getAddress().getStreet()).isEqualTo("Sveavägen 10");
         assertThat(storedCustomer.getAddress().getCity()).isEqualTo("Stockholm");
     }
+
+    @Test
+    void persistsTheOptionalBidirectionalProfileRelationship() {
+        Customer customer = new Customer(
+                "Grace",
+                "Hopper",
+                "grace.hopper@example.com",
+                new Address("Kungsgatan 20", "Uppsala", "753 21")
+        );
+        UserProfile profile = new UserProfile("grace-h", "+46709876543", "Compiler pioneer");
+        customer.assignProfile(profile);
+
+        entityManager.persist(customer);
+        entityManager.flush();
+        entityManager.clear();
+
+        Customer storedCustomer = entityManager.find(Customer.class, customer.getId());
+
+        assertThat(storedCustomer.getProfile().getNickname()).isEqualTo("grace-h");
+        assertThat(storedCustomer.getProfile().getCustomer().getEmail())
+                .isEqualTo("grace.hopper@example.com");
+    }
 }

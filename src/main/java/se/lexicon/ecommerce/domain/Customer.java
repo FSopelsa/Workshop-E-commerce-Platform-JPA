@@ -42,11 +42,22 @@ public class Customer {
     @JoinColumn(name = "address_id", nullable = false, unique = true)
     private Address address;
 
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "profile_id", unique = true)
+    private UserProfile profile;
+
     public Customer(String firstName, String lastName, String email, Address address) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.address = address;
+    }
+
+    public void assignProfile(UserProfile profile) {
+        this.profile = profile;
+        if (profile != null) {
+            profile.assignCustomer(this);
+        }
     }
 
     @PrePersist

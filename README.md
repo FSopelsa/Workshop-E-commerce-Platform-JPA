@@ -9,8 +9,8 @@ Saving or deleting a customer cascades to its address, and orphan removal is
 enabled. `createdAt` is assigned automatically just before a customer is first
 persisted.
 
-The optional bidirectional `Customer`/`UserProfile` relationship remains the next
-domain-model step.
+The customer also owns an optional bidirectional one-to-one profile relationship;
+the profile exposes the inverse side with `mappedBy`.
 
 ## Structure
 
