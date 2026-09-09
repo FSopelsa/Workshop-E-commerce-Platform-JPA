@@ -1,0 +1,19 @@
+package se.lexicon.ecommerce.repository;
+
+import se.lexicon.ecommerce.domain.UserProfile;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface UserProfileRepository extends JpaRepository<UserProfile, Long> {
+
+    List<UserProfile> findByNickname(String nickname);
+
+    List<UserProfile> findByPhoneNumberContaining(String phoneNumber);
+
+    List<UserProfile> findByBioIsNotNull();
+
+    List<UserProfile> findByNicknameStartingWith(String prefix);
+
+    long countByPhoneNumberStartingWith(String prefix);
+}

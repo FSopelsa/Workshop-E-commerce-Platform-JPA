@@ -1,16 +1,16 @@
 # E-commerce Platform JPA Workshop
 
-This branch implements the first functional half of Part 1: a runnable Spring
-Boot/JPA project and the required entity mappings for `Customer`, `Address`, and
-`UserProfile`.
+This branch implements the runnable Spring Boot/JPA foundation for Part 1,
+including the required entity mappings and repository query layer for
+`Customer`, `Address`, and `UserProfile`.
 
 The customer owns a mandatory, unidirectional one-to-one address relationship.
 Saving or deleting a customer cascades to its address, and orphan removal is
 enabled. `createdAt` is assigned automatically just before a customer is first
 persisted.
 
-The optional bidirectional `Customer`/`UserProfile` relationship and all
-repository query methods are intentionally left for the second half.
+The optional bidirectional `Customer`/`UserProfile` relationship remains the next
+domain-model step.
 
 ## Structure
 
@@ -21,8 +21,10 @@ src/main/java/se/lexicon/ecommerce/
     ├── Address.java              Required address table mapping
     ├── Customer.java             Customer and address ownership mapping
     └── UserProfile.java          Required profile table mapping
+src/main/java/.../repository/     Derived and JPQL repository queries
 src/main/resources/application.yml H2 development configuration
-src/test/.../CustomerJpaMappingTest.java JPA mapping smoke test
+src/test/.../CustomerJpaMappingTest.java Focused mapping smoke test
+src/test/.../RepositoryQueryTest.java Repository query coverage
 ```
 
 ## Run and verify
@@ -33,9 +35,9 @@ Use JDK 26 (the current project JDK) and Maven 3.6.3 or later.
 mvn clean test
 ```
 
-Expected result: Maven reports `BUILD SUCCESS`, and the JPA smoke test confirms
-that the schema can be generated, a customer persists with its address, and the
-creation timestamp is set.
+Expected result: Maven reports `BUILD SUCCESS` with four passing tests. The suite
+confirms schema generation, customer/address persistence, automatic creation
+timestamps, and the required repository queries.
 
 ```powershell
 mvn spring-boot:run
