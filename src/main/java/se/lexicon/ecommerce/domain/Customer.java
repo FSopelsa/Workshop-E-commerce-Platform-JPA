@@ -54,6 +54,18 @@ public class Customer {
     }
 
     public void assignProfile(UserProfile profile) {
+        if (this.profile == profile) {
+            return;
+        }
+
+        if (this.profile != null) {
+            this.profile.assignCustomer(null);
+        }
+
+        if (profile != null && profile.getCustomer() != null && profile.getCustomer() != this) {
+            profile.getCustomer().assignProfile(null);
+        }
+
         this.profile = profile;
         if (profile != null) {
             profile.assignCustomer(this);
