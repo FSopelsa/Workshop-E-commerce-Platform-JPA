@@ -213,16 +213,9 @@ You are expected to use:
 
 ## Submission Checklist
 
-- [x] **Git Branch**: Part 1 work is on `prel/jpa-part1-foundation`.
-- [x] **Project setup**: Maven, Spring Boot, JPA, web, validation, H2, MySQL, DevTools,
-  Lombok, and a project-local Maven repository are configured.
-- [ ] **Entities**: Required scalar mappings and the Customer-to-Address one-to-one
-  mapping are complete. The optional bidirectional Customer-to-UserProfile mapping
-  is still outstanding.
-- [x] **Repositories**: CustomerRepository, UserProfileRepository, and AddressRepository
-  now contain the required derived queries and the applicable advanced queries.
-- [x] **Verification**: The application starts with H2 and the JPA tests verify schema
-  generation, persistence, and repository queries.
-- [ ] **Commits**: The initial implementation is committed; the repository step still
-  needs its own descriptive commit.
-- [ ] **Push**: Push the completed branch to GitHub and provide the link.
+- [x] **Git Branch**: Create a feature branch for Part 1 (e.g., `feature/jpa-part1`).
+- [x] **Entities**: Map the required entities, including their One-to-One relationships.
+- [x] **Repositories**: Create the necessary repository interfaces with all required query methods.
+- [x] **Verification**: Run the application and ensure the database schema is generated correctly.
+- [x] **Commits**: Make descriptive commits for each major step.
+- [x] **Push**: Push the branch to GitHub and provide the link.

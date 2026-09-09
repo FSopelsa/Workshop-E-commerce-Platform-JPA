@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -29,9 +30,16 @@ public class UserProfile {
     @Column(length = 500)
     private String bio;
 
+    @OneToOne(mappedBy = "profile")
+    private Customer customer;
+
     public UserProfile(String nickname, String phoneNumber, String bio) {
         this.nickname = nickname;
         this.phoneNumber = phoneNumber;
         this.bio = bio;
+    }
+
+    void assignCustomer(Customer customer) {
+        this.customer = customer;
     }
 }
