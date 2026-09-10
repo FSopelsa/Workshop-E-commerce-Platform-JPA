@@ -22,9 +22,10 @@ src/main/java/se/lexicon/ecommerce/
     ├── Customer.java             Customer and address ownership mapping
     └── UserProfile.java          Required profile table mapping
 src/main/java/.../repository/     Derived and JPQL repository queries
-src/main/resources/application.yml H2 development configuration
+src/main/resources/application-*.yml  H2 and MySQL application profiles
 src/test/.../CustomerJpaMappingTest.java Focused mapping smoke test
 src/test/.../RepositoryQueryTest.java Repository query coverage
+src/test/resources/application-test.yml Explicit H2 test configuration
 ```
 
 ## Run and verify
@@ -35,7 +36,7 @@ Use JDK 26 (the current project JDK) and Maven 3.6.3 or later.
 mvn clean test
 ```
 
-Expected result: Maven reports `BUILD SUCCESS` with four passing tests. The suite
+Expected result: Maven reports `BUILD SUCCESS` with six passing tests. The suite
 confirms schema generation, customer/address persistence, automatic creation
 timestamps, and the required repository queries.
 
@@ -43,5 +44,7 @@ timestamps, and the required repository queries.
 mvn spring-boot:run
 ```
 
-The application starts with an in-memory H2 database. The H2 console is enabled
-at `http://localhost:8080/h2-console` while the application is running.
+The application uses the H2 profile by default and starts with an in-memory H2
+database. The H2 console is enabled at `http://localhost:8080/h2-console` while
+the application is running. To use MySQL instead, start with the `mysql` profile
+and provide `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD` as needed.

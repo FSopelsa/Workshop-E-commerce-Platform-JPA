@@ -1,14 +1,7 @@
 spring:
   application:
     name: ecommerce-platform
-  datasource:
-    url: jdbc:h2:mem:ecommerce;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
-    username: sa
-    password:
-  h2:
-    console:
-      enabled: true
+  profiles:
+    default: h2
   jpa:
-    hibernate:
-      ddl-auto: create-drop
     open-in-view: false
