@@ -16,6 +16,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @EntityGraph(attributePaths = "items")
     List<Order> findByStatus(OrderStatus status);
 
+    @EntityGraph(attributePaths = "items")
     Optional<Order> findFirstByStatus(OrderStatus status);
 
     List<Order> findByOrderDateAfter(Instant date);

@@ -17,6 +17,7 @@ import se.lexicon.ecommerce.domain.Promotion;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -87,7 +88,9 @@ class Part2RepositoryQueryTest {
                 .extracting(Promotion::getCode)
                 .containsExactly("SPRING10");
 
-        Order loadedOrder = orderRepository.findByStatus(OrderStatus.CREATED).get(0);
+        Optional<Order> optionalOrder = orderRepository.findFirstByStatus(OrderStatus.CREATED);
+        assertThat(optionalOrder).isPresent();
+        Order loadedOrder = optionalOrder.get();
 
         assertThat(Hibernate.isInitialized(loadedOrder.getItems())).isTrue();
         assertThat(loadedOrder.getItems()).hasSize(1);
