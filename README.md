@@ -36,6 +36,17 @@ src/test/...                         Mapping, query, and seeding coverage
 src/test/resources/application-test.yml Explicit H2 test configuration
 ```
 
+## Part 2 submission status
+
+- [x] **Git Branch**: Part 2 work is on `feature/jpa-part2`.
+- [x] **Entities & Enums**: `Category`, `Product`, `Promotion`, `Order`, `OrderItem`, and `OrderStatus` are implemented.
+- [x] **Relationships**: The required Product/Category, Order/OrderItem, Order/Customer, and Product/Promotion mappings are implemented with the specified ownership, fetch, cascade, and orphan-removal rules.
+- [ ] **Repositories**: The required repository interfaces and queries are implemented, including `@EntityGraph` order loading, but `CategoryRepository.java` is still under development.
+- [ ] **Extra Task**: `CatalogDataSeeder.java` implements idempotent category and product seeding, but the seeder is still unversioned.
+- [x] **Verification**: The application started with H2 and the Maven suite previously passed with 11 tests, covering schema generation, mappings, queries, N+1-safe loading, and seeding.
+- [x] **Commits**: Descriptive Part 2 commits exist for the domain model, ORM mapping/repository work, and follow-up test/repository corrections.
+- [/] **Push**: `feature/jpa-part2` is pushed, but the unfinished repository, seeder, and seeder-test files still need to be included in a future commit. Nothing from part 2 has been merged into main yet.
+
 ## Run and verify
 
 Use JDK 26 (the current project JDK) and Maven 3.6.3 or later.
