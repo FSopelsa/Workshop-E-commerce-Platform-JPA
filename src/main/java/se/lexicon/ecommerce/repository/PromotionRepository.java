@@ -27,4 +27,8 @@ public interface PromotionRepository extends JpaRepository<Promotion, Long> {
     List<Promotion> findByEndDateBefore(LocalDate date);
 
     List<Promotion> findByEndDateIsNull();
+
+    default List<Promotion> findActiveToday() {
+        return findActiveOn(LocalDate.now());
+    }
 }
