@@ -1,0 +1,141 @@
+package se.lexicon.ecommerce.repository;
+
+import org.hibernate.Hibernate;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.test.context.ActiveProfiles;
+import se.lexicon.ecommerce.domain.Address;
+import se.lexicon.ecommerce.domain.Category;
+import se.lexicon.ecommerce.domain.Customer;
+import se.lexicon.ecommerce.domain.Order;
+import se.lexicon.ecommerce.domain.OrderStatus;
+import se.lexicon.ecommerce.domain.Product;
+import se.lexicon.ecommerce.domain.Promotion;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@DataJpaTest(showSql = false)
+@ActiveProfiles("test")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+class Part2RepositoryQueryTest {
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private PromotionRepository promotionRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private OrderItemRepository orderItemRepository;
+
+    private Customer customer;
+    private Product product;
+
+    @BeforeEach
+    void setUp() {
+        Category electronics = categoryRepository.save(new Category("Electronics"));
+        Category books = categoryRepository.save(new Category("Books"));
+        product = productRepository.save(new Product("Headphones", new BigDecimal("1299.00"), electronics));
+        productRepository.save(new Product("JPA Guide", new BigDecimal("499.00"), books));
+
+        Promotion promotion = promotionRepository.save(new Promotion(
+                "SPRING10",
+                LocalDate.of(2026, 3, 1),
+                LocalDate.of(2026, 4, 30)
+        ));
+        product.addPromotion(promotion);
+        productRepository.saveAndFlush(product);
+
+        customer = customerRepository.save(new Customer(
+                "Ada",
+                "Lovelace",
+                "ada.repository.part2@example.com",
+                new Address("Sveavägen 10", "Stockholm", "111 57")
+        ));
+        Order order = new Order(customer);
+        order.addItem(product, 2, new BigDecimal("1199.00"));
+        orderRepository.saveAndFlush(order);
+    }
+
+    @Test
+    void findsCategoriesAndProductsThroughRequiredNestedQueries() {
+        assertThat(categoryRepository.findByNameIgnoreCase("electronics")).isPresent();
+        assertThat(categoryRepository.existsByNameIgnoreCase("BOOKS")).isTrue();
+        assertThat(categoryRepository.findByNameContainingIgnoreCase("lect")).extracting(Category::getName)
+                .containsExactly("Electronics");
+        assertThat(categoryRepository.countCategories()).isEqualTo(2);
+        assertThat(productRepository.findByCategory_NameIgnoreCase("ELECTRONICS"))
+                .extracting(Product::getName)
+                .containsExactly("Headphones");
+        assertThat(productRepository.findByPriceBetween(new BigDecimal("1000.00"), new BigDecimal("1500.00")))
+                .extracting(Product::getName)
+                .containsExactly("Headphones");
+        assertThat(productRepository.findByNameContainingIgnoreCase("guide")).extracting(Product::getName)
+                .containsExactly("JPA Guide");
+        assertThat(productRepository.findByPriceLessThan(new BigDecimal("600.00"))).extracting(Product::getName)
+                .containsExactly("JPA Guide");
+        assertThat(productRepository.findByPriceBetweenOrderByPriceAsc(BigDecimal.ZERO, new BigDecimal("1500.00")))
+                .extracting(Product::getName)
+                .containsExactly("JPA Guide", "Headphones");
+        assertThat(productRepository.findByCategory_Id(product.getCategory().getId()))
+                .extracting(Product::getName)
+                .containsExactly("Headphones");
+        assertThat(productRepository.countByCategory_Id(product.getCategory().getId())).isEqualTo(1);
+    }
+
+    @Test
+    void findsActivePromotionsAndLoadsOrderItemsWithStatusQuery() {
+        assertThat(promotionRepository.findActiveOn(LocalDate.of(2026, 3, 15)))
+                .extracting(Promotion::getCode)
+                .containsExactly("SPRING10");
+        assertThat(promotionRepository.findByCodeIgnoreCase("spring10")).isPresent();
+        assertThat(promotionRepository.findByStartDateAfter(LocalDate.of(2026, 1, 1)))
+                .extracting(Promotion::getCode)
+                .containsExactly("SPRING10");
+        assertThat(promotionRepository.findByEndDateBefore(LocalDate.of(2026, 12, 31)))
+                .extracting(Promotion::getCode)
+                .containsExactly("SPRING10");
+        assertThat(promotionRepository.findByEndDateIsNull()).isEmpty();
+
+        promotionRepository.save(new Promotion(
+                "TODAY",
+                LocalDate.now().minusDays(1),
+                LocalDate.now().plusDays(1)
+        ));
+        assertThat(promotionRepository.findActiveToday()).extracting(Promotion::getCode).contains("TODAY");
+
+        Optional<Order> optionalOrder = orderRepository.findFirstByStatus(OrderStatus.CREATED);
+        assertThat(optionalOrder).isPresent();
+        Order loadedOrder = optionalOrder.get();
+
+        assertThat(Hibernate.isInitialized(loadedOrder.getItems())).isTrue();
+        assertThat(loadedOrder.getItems()).hasSize(1);
+        assertThat(orderRepository.findByCustomer_Id(customer.getId())).hasSize(1);
+        assertThat(orderRepository.findByItems_Product_Id(product.getId())).hasSize(1);
+        assertThat(orderRepository.findByOrderDateAfter(Instant.now().minusSeconds(60))).hasSize(1);
+        assertThat(orderRepository.findByOrderDateBetween(Instant.now().minusSeconds(60), Instant.now().plusSeconds(60)))
+                .hasSize(1);
+        assertThat(orderRepository.countByStatus(OrderStatus.CREATED)).isEqualTo(1);
+        assertThat(orderRepository.findByCustomer_IdAndStatus(customer.getId(), OrderStatus.CREATED)).hasSize(1);
+        assertThat(orderItemRepository.findByOrder_Id(loadedOrder.getId())).hasSize(1);
+        assertThat(orderItemRepository.findByProduct_Id(product.getId())).hasSize(1);
+        assertThat(orderItemRepository.findByQuantityGreaterThan(1)).hasSize(1);
+    }
+}
