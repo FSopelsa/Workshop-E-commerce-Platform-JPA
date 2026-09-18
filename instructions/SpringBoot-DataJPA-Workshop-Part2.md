@@ -385,15 +385,15 @@ When the application runs, create a mechanism to automatically insert initial te
 - [x] **Git Branch**: Part 2 work is on `feature/jpa-part2`.
 - [x] **Entities & Enums**: `Category`, `Product`, `Promotion`, `Order`, `OrderItem`, and `OrderStatus` are implemented.
 - [x] **Relationships**: The required Product/Category, Order/OrderItem, Order/Customer, and Product/Promotion mappings are implemented with the specified ownership, fetch, cascade, and orphan-removal rules.
-- [x] **Repositories**: The required and optional repository queries are implemented, including `@EntityGraph` order loading, category counts, and active-today promotion lookup. The latest optional-query changes are currently local edits.
+- [x] **Repositories**: The required and optional repository queries are implemented, including both product price sort directions, `@EntityGraph` order loading, category counts, and active-today promotion lookup.
 - [x] **Extra Task**: `CatalogDataSeeder.java` implements idempotent category and product seeding, with categories created before products.
-- [x] **Verification**: The application started with H2 and the Maven suite previously passed with 11 tests, covering schema generation, mappings, queries, N+1-safe loading, and seeding.
-- [ ] **Commits**: Descriptive Part 2 commits exist, but the latest optional-query additions are still uncommitted local edits.
-- [ ] **Push**: `feature/jpa-part2` is pushed through `97e6018`; the latest optional-query additions still need to be committed and pushed. Nothing from Part 2 has been merged into `main`.
+- [x] **Verification**: The application starts with H2 and the Maven suite passes with 13 tests, covering schema generation, mappings, queries, both N+1-safe status-loading methods, and seeding.
+- [ ] **Review follow-up commit**: The current documentation, sorting, and exact `findByStatus` test improvements are intentionally uncommitted for manual review.
+- [ ] **Review follow-up push**: The review follow-up changes still need to be committed and pushed manually. The existing Part 2 implementation is already pushed, and nothing from Part 2 has been merged into `main`.
 
 ### Current Git boundary
 
-At the time of this update, `feature/jpa-part2` and its remote-tracking branch pointed to `97e6018`. The current local edits are in `CategoryRepository.java`, `PromotionRepository.java`, and `Part2RepositoryQueryTest.java`; they are intentionally not committed so they can be reviewed and committed manually.
+Before this review follow-up, `feature/jpa-part2` and its remote-tracking branch pointed to `5f6c3d5`. The current local edits are in `ProductRepository.java`, `Part2RepositoryQueryTest.java`, `README.md`, and this instruction file; they are intentionally not committed so they can be reviewed and committed manually.
 
 The Part 2 work remains on `feature/jpa-part2`; `main` still points to the Part 1 line of history.
 

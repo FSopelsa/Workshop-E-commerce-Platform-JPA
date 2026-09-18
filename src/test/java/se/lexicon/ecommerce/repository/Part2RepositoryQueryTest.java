@@ -18,6 +18,7 @@ import se.lexicon.ecommerce.domain.Promotion;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -94,6 +95,9 @@ class Part2RepositoryQueryTest {
         assertThat(productRepository.findByPriceBetweenOrderByPriceAsc(BigDecimal.ZERO, new BigDecimal("1500.00")))
                 .extracting(Product::getName)
                 .containsExactly("JPA Guide", "Headphones");
+        assertThat(productRepository.findByPriceBetweenOrderByPriceDesc(BigDecimal.ZERO, new BigDecimal("1500.00")))
+                .extracting(Product::getName)
+                .containsExactly("Headphones", "JPA Guide");
         assertThat(productRepository.findByCategory_Id(product.getCategory().getId()))
                 .extracting(Product::getName)
                 .containsExactly("Headphones");
@@ -127,6 +131,11 @@ class Part2RepositoryQueryTest {
 
         assertThat(Hibernate.isInitialized(loadedOrder.getItems())).isTrue();
         assertThat(loadedOrder.getItems()).hasSize(1);
+
+        List<Order> statusOrders = orderRepository.findByStatus(OrderStatus.CREATED);
+        assertThat(statusOrders).hasSize(1);
+        assertThat(Hibernate.isInitialized(statusOrders.getFirst().getItems())).isTrue();
+
         assertThat(orderRepository.findByCustomer_Id(customer.getId())).hasSize(1);
         assertThat(orderRepository.findByItems_Product_Id(product.getId())).hasSize(1);
         assertThat(orderRepository.findByOrderDateAfter(Instant.now().minusSeconds(60))).hasSize(1);

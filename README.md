@@ -50,7 +50,7 @@ Implemented repository behavior includes:
 
 - Category lookup by name, existence check, keyword search, and category count.
 - Product lookup by category name, price range, keyword, max price, category ID,
-  sorted price, and product count per category.
+  sorted price in both directions, and product count per category.
 - Order lookup by customer, status, date range, contained product, status count,
   and customer/status combination.
 - Order item lookup by order ID, product ID, and minimum quantity.
@@ -100,7 +100,7 @@ Expected result:
 
 ```text
 BUILD SUCCESS
-Tests run: 11, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 13, Failures: 0, Errors: 0, Skipped: 0
 ```
 
 On my current Windows/JDK 26 environment, this equivalent command avoids a Java
@@ -137,6 +137,7 @@ mvn "-Dmaven.repo.local=target\maven-repository" "-Dmaven.compiler.fork=true" "-
 
 ## Examination Status
 
-This project can be seen as finished. The required Part 2 ORM
-mapping tasks, repository tasks, optional repository tasks, and extra data
-seeding task are implemented and covered by tests.
+The required Part 2 ORM mapping tasks, repository tasks, optional repository
+tasks, and extra data seeding task are implemented. The project has been
+verified with the H2 startup configuration and the complete 13-test Maven
+suite.

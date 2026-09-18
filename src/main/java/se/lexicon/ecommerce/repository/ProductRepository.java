@@ -19,6 +19,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     List<Product> findByPriceBetweenOrderByPriceAsc(BigDecimal minimumPrice, BigDecimal maximumPrice);
 
+    List<Product> findByPriceBetweenOrderByPriceDesc(BigDecimal minimumPrice, BigDecimal maximumPrice);
+
     List<Product> findByCategory_Id(Long categoryId);
 
     Optional<Product> findByNameIgnoreCase(String name);
