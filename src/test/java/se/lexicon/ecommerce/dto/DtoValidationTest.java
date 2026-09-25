@@ -1,16 +1,16 @@
 package se.lexicon.ecommerce.dto;
 
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
-import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class DtoValidationTest {
-
-    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     @Test
     void rejectsInvalidCustomerRequestFields() {
@@ -24,7 +24,7 @@ class DtoValidationTest {
                 "111 57"
         );
 
-        assertThat(validator.validate(request))
+        assertThat(validate(request))
                 .extracting(violation -> violation.getPropertyPath().toString())
                 .contains("firstName", "email", "password");
     }
@@ -32,13 +32,20 @@ class DtoValidationTest {
     @Test
     void rejectsEmptyOrderItemsAndNonPositiveQuantities() {
         OrderRequest emptyOrder = new OrderRequest(1L, List.of());
+        //noinspection DataFlowIssue
         OrderRequest invalidItemOrder = new OrderRequest(1L, List.of(new OrderItemRequest(2L, 0)));
 
-        assertThat(validator.validate(emptyOrder))
+        assertThat(validate(emptyOrder))
                 .extracting(violation -> violation.getPropertyPath().toString())
                 .contains("items");
-        assertThat(validator.validate(invalidItemOrder))
+        assertThat(validate(invalidItemOrder))
                 .extracting(violation -> violation.getPropertyPath().toString())
                 .contains("items[0].quantity");
+    }
+
+    private <T> Set<ConstraintViolation<T>> validate(T value) {
+        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+            return factory.getValidator().validate(value);
+        }
     }
 }
