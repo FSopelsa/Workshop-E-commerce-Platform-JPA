@@ -58,7 +58,7 @@ class Part2DomainMappingTest {
                 .getSingleResult())
                 .isEqualTo("PAID");
         assertThat(storedOrder.getItems()).hasSize(1);
-        assertThat(storedOrder.getItems().get(0).getProduct().getName()).isEqualTo("Headphones");
+        assertThat(storedOrder.getItems().getFirst().getProduct().getName()).isEqualTo("Headphones");
         assertThat(storedProduct.getCategory().getName()).isEqualTo("Electronics");
         assertThat(storedProduct.getPromotions()).extracting(Promotion::getCode).containsExactly("SPRING10");
     }
@@ -81,5 +81,42 @@ class Part2DomainMappingTest {
         })
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("an order must contain at least one item");
+    }
+
+    @Test
+    void rejectsRemovingTheLastOrderItem() {
+        Category category = new Category("Books");
+        Product product = new Product("JPA Guide", new BigDecimal("299.00"), category);
+        Customer customer = new Customer(
+                "Linus",
+                "Torvalds",
+                "linus.part2@example.com",
+                new Address("Storgatan 1", "Lund", "222 22")
+        );
+        Order order = new Order(customer);
+        OrderItem item = order.addItem(product, 1, new BigDecimal("299.00"));
+
+        assertThatThrownBy(() -> order.removeItem(item))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("an order must contain at least one item");
+
+        assertThat(order.getItems()).containsExactly(item);
+    }
+
+    @Test
+    void exposesOrderItemsAsReadOnlyList() {
+        Category category = new Category("Games");
+        Product product = new Product("Strategy Game", new BigDecimal("499.00"), category);
+        Customer customer = new Customer(
+                "Margaret",
+                "Hamilton",
+                "margaret.part2@example.com",
+                new Address("Drottninggatan 5", "Stockholm", "111 51")
+        );
+        Order order = new Order(customer);
+        order.addItem(product, 1, new BigDecimal("499.00"));
+
+        assertThatThrownBy(() -> order.getItems().clear())
+                .isInstanceOf(UnsupportedOperationException.class);
     }
 }

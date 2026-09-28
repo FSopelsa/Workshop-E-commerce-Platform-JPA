@@ -10,6 +10,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 @Getter
 @Entity
 @Table(name = "addresses")
@@ -33,5 +35,11 @@ public class Address {
         this.street = street;
         this.city = city;
         this.zipCode = zipCode;
+    }
+
+    public void updateDetails(String street, String city, String zipCode) {
+        this.street = Objects.requireNonNull(street, "street must not be null");
+        this.city = Objects.requireNonNull(city, "city must not be null");
+        this.zipCode = Objects.requireNonNull(zipCode, "zipCode must not be null");
     }
 }

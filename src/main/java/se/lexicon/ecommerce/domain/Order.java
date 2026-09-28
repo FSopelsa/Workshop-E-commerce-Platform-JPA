@@ -23,6 +23,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -73,9 +74,16 @@ public class Order {
     }
 
     public void removeItem(OrderItem item) {
+        if (items.contains(item) && items.size() == 1) {
+            throw new IllegalStateException("an order must contain at least one item");
+        }
         if (items.remove(item)) {
             item.detachFrom(this);
         }
+    }
+
+    public List<OrderItem> getItems() {
+        return Collections.unmodifiableList(items);
     }
 
     public void changeStatus(OrderStatus status) {

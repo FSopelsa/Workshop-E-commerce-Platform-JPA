@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.Objects;
 
 @Getter
 @Entity
@@ -51,6 +52,21 @@ public class Customer {
         this.lastName = lastName;
         this.email = email;
         this.address = address;
+    }
+
+    public void updateDetails(
+            String firstName,
+            String lastName,
+            String email,
+            String street,
+            String city,
+            String zipCode
+    ) {
+        this.firstName = Objects.requireNonNull(firstName, "firstName must not be null");
+        this.lastName = Objects.requireNonNull(lastName, "lastName must not be null");
+        this.email = Objects.requireNonNull(email, "email must not be null");
+        Objects.requireNonNull(address, "customer address must not be null")
+                .updateDetails(street, city, zipCode);
     }
 
     public void assignProfile(UserProfile profile) {
