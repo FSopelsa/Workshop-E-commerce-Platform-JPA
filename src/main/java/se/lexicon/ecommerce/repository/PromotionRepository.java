@@ -1,6 +1,7 @@
 package se.lexicon.ecommerce.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import se.lexicon.ecommerce.domain.Promotion;
@@ -12,12 +13,13 @@ import java.util.Optional;
 public interface PromotionRepository extends JpaRepository<Promotion, Long> {
 
     @Query("""
-            select p
+            select distinct p
             from Promotion p
             where p.startDate <= :date
               and (p.endDate is null or p.endDate >= :date)
             order by p.startDate desc
             """)
+    @EntityGraph(attributePaths = "products")
     List<Promotion> findActiveOn(@Param("date") LocalDate date);
 
     Optional<Promotion> findByCodeIgnoreCase(String code);

@@ -12,6 +12,7 @@ import se.lexicon.ecommerce.dto.OrderResponse;
 
 import java.util.Map;
 import java.util.Objects;
+import java.math.BigDecimal;
 
 @Component
 public class OrderMapper {
@@ -34,16 +35,30 @@ public class OrderMapper {
      * without creating transient or detached category/product references.
      */
     public Order toEntity(OrderRequest request, Customer customer, Map<Long, Product> productsById) {
+        return toEntity(request, customer, productsById, Map.of());
+    }
+
+    public Order toEntity(
+            OrderRequest request,
+            Customer customer,
+            Map<Long, Product> productsById,
+            Map<Long, BigDecimal> pricesAtPurchaseByProductId
+    ) {
         Objects.requireNonNull(request, "order request must not be null");
         Order order = new Order(Objects.requireNonNull(customer, "order customer must not be null"));
         Map<Long, Product> resolvedProducts = Objects.requireNonNull(productsById, "products must not be null");
+        Map<Long, BigDecimal> pricesAtPurchase = Objects.requireNonNull(
+                pricesAtPurchaseByProductId,
+                "pricesAtPurchaseByProductId must not be null"
+        );
 
         for (OrderItemRequest itemRequest : request.items()) {
             Product product = resolvedProducts.get(itemRequest.productId());
             if (product == null) {
                 throw new IllegalArgumentException("product must be resolved before mapping: " + itemRequest.productId());
             }
-            order.addItem(product, itemRequest.quantity(), product.getPrice());
+            BigDecimal priceAtPurchase = pricesAtPurchase.getOrDefault(itemRequest.productId(), product.getPrice());
+            order.addItem(product, itemRequest.quantity(), priceAtPurchase);
         }
 
         return order;

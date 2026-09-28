@@ -1,10 +1,6 @@
 package se.lexicon.ecommerce.dto;
 
-/**
- * Response contract for the category service introduced in the optional
- * advanced-services part of the workshop.
- */
-@SuppressWarnings("unused")
+/** Response contract returned by the category service and REST API. */
 public record CategoryResponse(
         Long id,
         String name
