@@ -3,9 +3,8 @@
 # E-commerce Platform JPA Workshop
 
 A Spring Boot and Spring Data JPA workshop project covering the customer,
-catalog, promotion, and ordering domain. Parts 1 and 2 are implemented. Part 3
-currently includes its DTO and mapper layer, service layer, and transaction
-rollback coverage.
+catalog, promotion, and ordering domain. Parts 1–3 are implemented, including
+the Part 3 REST API and both optional category and promotion services.
 
 ## Current implementation
 
@@ -18,33 +17,64 @@ rollback coverage.
 - `CustomerMapper`, `ProductMapper`, and `OrderMapper` Spring components.
 - `CustomerService`, `ProductService`, and `OrderService`, each using an
   interface and implementation.
+- `CategoryService` and `PromotionService` for optional category management and
+  promotion selection/discount calculations.
 - Duplicate-email and resource-not-found exceptions used by the services.
-- `ApiExceptionHandler` maps those exceptions to HTTP 409 Conflict and 404 Not
-  Found `ProblemDetail` responses for Spring MVC controllers.
-- Transactional customer registration and updates, product creation, and order
-  placement. Order items retain the product's current price at purchase time.
+- REST controllers for customers, products, orders, categories, and promotions.
+  Create operations return `201 Created` with a `Location` header.
+- `ApiExceptionHandler` returns RFC 9457-style `ProblemDetail` responses:
+  `400 Bad Request` for invalid input, `404 Not Found` for missing resources,
+  and `409 Conflict` for duplicates.
+- Transactional customer registration and updates, product/category/promotion
+  creation, and order placement. Orders use the highest-percentage promotion
+  active for each product and persist the resulting price at purchase time.
 - H2 integration coverage that forces an item insert to fail and verifies the
   entire order transaction rolls back.
+- MockMvc integration coverage for the REST workflows, validation, duplicate
+  resources, missing resources, and the best-active-promotion rule.
 
-## Workshop status and current limits
+## Workshop status and scope
 
 - Part 1: customer and address persistence, including optional user profiles.
 - Part 2: domain mappings, repository queries, and seed data.
-- Part 3, Tasks 1–3: DTOs, mappers, services, and order transaction rollback
-  coverage are implemented.
-- Part 3, Task 4: custom service exceptions and centralized HTTP error mapping
-  are implemented.
-- Optional category and promotion services are not implemented. Promotions are
-  mapped in the domain and repository, but are not applied during order
-  placement.
-- There are no REST controllers yet. Running the application starts the Spring
-  Boot app and seeds the database; it does not expose customer, product, or
-  order API endpoints.
+- Part 3, Tasks 1–4: DTOs, mappers, services, transaction rollback coverage,
+  custom exceptions, centralized HTTP error mapping, and REST controllers are
+  implemented.
+- Both Part 3 optional services are implemented: categories can be created and
+  listed; promotions can be created, listed while active, and evaluated for a
+  product. If several promotions apply, the greatest discount percentage wins.
 - `CustomerRequest` validates a password, but the current `Customer` entity has
   no password field or authentication feature. The mapper intentionally does
-  not persist it.
-- `CategoryResponse` is available for the optional category service and is not
-  currently used by application code.
+  not persist it; this workshop API has no authentication or authorization.
+
+## REST API
+
+The API is available under `/api` when the application is running. Request
+bodies for create/update operations are validated; invalid values return 400,
+duplicate resources return 409, and unknown IDs return 404.
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `POST` | `/api/customers` | Register a customer |
+| `GET` | `/api/customers/{id}` | Get a customer |
+| `PUT` | `/api/customers/{id}` | Update a customer |
+| `POST` | `/api/products` | Create a product |
+| `GET` | `/api/products` | List products; optional `?name=...` searches by name |
+| `GET` | `/api/products/{id}` | Get a product |
+| `POST` | `/api/orders` | Place an order |
+| `GET` | `/api/orders/{id}` | Get an order |
+| `POST` | `/api/categories` | Create a category |
+| `GET` | `/api/categories` | List categories |
+| `GET` | `/api/categories/{id}` | Get a category |
+| `POST` | `/api/promotions` | Create a percentage promotion for product IDs |
+| `GET` | `/api/promotions/active` | List promotions active today |
+| `GET` | `/api/promotions/{id}` | Get a promotion |
+| `GET` | `/api/promotions/products/{productId}/discount` | Preview the best active discount for a product |
+
+Promotions use inclusive start/end dates, with a missing end date meaning no
+expiry. The discount preview and order placement both use the highest active
+percentage for the product. For example, create a promotion with a JSON body
+like `{"code":"SUMMER15","startDate":"2026-09-01","endDate":"2026-09-30","discountPercentage":15,"productIds":[1]}`.
 
 ## Run locally
 
@@ -105,17 +135,18 @@ Run a clean build and test suite:
 mvn "-Dmaven.compiler.fork=true" clean test
 ```
 
-Run only the service unit tests or the transaction rollback integration test:
+Run focused service, transaction rollback, or REST integration tests:
 
 ```powershell
 mvn "-Dmaven.compiler.fork=true" "-Dtest=ServiceLayerTest" test
 mvn "-Dmaven.compiler.fork=true" "-Dtest=OrderServiceTransactionTest" test
+mvn "-Dmaven.compiler.fork=true" "-Dtest=CommerceApiIntegrationTest" test
 ```
 
 Tests use the `test` profile and an H2 database configured with schema
 creation/drop. The suite covers entity mappings, repositories and queries,
-DTO validation, mapper behavior, service rules, seeding, and transaction
-rollback. `.mvn/maven.config` points Maven's dependency cache to
+DTO validation, mapper behavior, service rules, seeding, HTTP workflows, and
+transaction rollback. `.mvn/maven.config` points Maven's dependency cache to
 `.mvn/repository`; the compiler fork option is included above for the current
 Windows/JDK 26 environment.
 
@@ -124,6 +155,7 @@ Windows/JDK 26 environment.
 ```text
 src/main/java/se/lexicon/ecommerce/
 |-- EcommerceApplication.java          Spring Boot entry point
+|-- controller/                        REST controllers under /api
 |-- domain/                            JPA entities and OrderStatus enum
 |-- dto/                               Request and response records
 |-- exception/                         Service exceptions and HTTP advice
@@ -139,7 +171,9 @@ src/main/resources/
 
 src/test/java/se/lexicon/ecommerce/
 |-- domain/                            Entity mapping tests
+|-- controller/                        REST API integration tests
 |-- dto/                               DTO validation tests
+|-- exception/                         HTTP exception-mapping tests
 |-- mapper/                            Mapper tests
 |-- repository/                        Repository query tests
 |-- seed/                              Seeder tests

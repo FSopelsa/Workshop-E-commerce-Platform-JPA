@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 )
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({OrderServiceImpl.class, OrderMapper.class})
+@Import({OrderServiceImpl.class, OrderMapper.class, PromotionServiceImpl.class})
 class OrderServiceTransactionTest {
 
     private static final String QUANTITY_CHECK_CONSTRAINT = "chk_order_item_quantity_for_rollback_test";

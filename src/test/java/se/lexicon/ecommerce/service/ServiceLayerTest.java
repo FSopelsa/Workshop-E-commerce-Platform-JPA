@@ -50,6 +50,9 @@ class ServiceLayerTest {
     @Mock
     private OrderRepository orderRepository;
 
+    @Mock
+    private PromotionService promotionService;
+
     private final CustomerMapper customerMapper = new CustomerMapper();
     private final ProductMapper productMapper = new ProductMapper();
     private final OrderMapper orderMapper = new OrderMapper();
@@ -150,10 +153,17 @@ class ServiceLayerTest {
         Product product = new Product("JPA Guide", new BigDecimal("499.00"), category);
         when(customerRepository.findById(11L)).thenReturn(Optional.of(customer));
         when(productRepository.findById(22L)).thenReturn(Optional.of(product));
+        when(promotionService.calculateDiscount(product)).thenReturn(BigDecimal.ZERO);
         when(orderRepository.save(any(se.lexicon.ecommerce.domain.Order.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        OrderService service = new OrderServiceImpl(orderRepository, customerRepository, productRepository, orderMapper);
+        OrderService service = new OrderServiceImpl(
+                orderRepository,
+                customerRepository,
+                productRepository,
+                orderMapper,
+                promotionService
+        );
         var response = service.placeOrder(new OrderRequest(
                 11L,
                 List.of(new OrderItemRequest(22L, 2))
@@ -178,8 +188,13 @@ class ServiceLayerTest {
     void rejectsOrderForMissingCustomer() {
         when(customerRepository.findById(404L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> new OrderServiceImpl(orderRepository, customerRepository, productRepository, orderMapper)
-                .placeOrder(new OrderRequest(404L, List.of(new OrderItemRequest(22L, 1)))))
+        assertThatThrownBy(() -> new OrderServiceImpl(
+                orderRepository,
+                customerRepository,
+                productRepository,
+                orderMapper,
+                promotionService
+        ).placeOrder(new OrderRequest(404L, List.of(new OrderItemRequest(22L, 1)))))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("404");
     }

@@ -44,6 +44,15 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
+    public ProductResponse findById(Long id) {
+        Objects.requireNonNull(id, "product id must not be null");
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("product not found: " + id));
+        return productMapper.toResponse(product);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<ProductResponse> findAll() {
         return productRepository.findAll().stream()
                 .map(productMapper::toResponse)

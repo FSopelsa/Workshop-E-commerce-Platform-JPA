@@ -17,6 +17,7 @@ import se.lexicon.ecommerce.repository.ProductRepository;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.math.BigDecimal;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -25,17 +26,20 @@ public class OrderServiceImpl implements OrderService {
     private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
     private final OrderMapper orderMapper;
+    private final PromotionService promotionService;
 
     public OrderServiceImpl(
             OrderRepository orderRepository,
             CustomerRepository customerRepository,
             ProductRepository productRepository,
-            OrderMapper orderMapper
+            OrderMapper orderMapper,
+            PromotionService promotionService
     ) {
         this.orderRepository = Objects.requireNonNull(orderRepository, "orderRepository must not be null");
         this.customerRepository = Objects.requireNonNull(customerRepository, "customerRepository must not be null");
         this.productRepository = Objects.requireNonNull(productRepository, "productRepository must not be null");
         this.orderMapper = Objects.requireNonNull(orderMapper, "orderMapper must not be null");
+        this.promotionService = Objects.requireNonNull(promotionService, "promotionService must not be null");
     }
 
     @Override
@@ -46,16 +50,30 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("customer not found: " + request.customerId()));
 
         Map<Long, Product> productsById = new LinkedHashMap<>();
+        Map<Long, BigDecimal> pricesAtPurchase = new LinkedHashMap<>();
         for (OrderItemRequest itemRequest : request.items()) {
             Product product = productRepository.findById(itemRequest.productId())
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "product not found: " + itemRequest.productId()
                     ));
             productsById.put(itemRequest.productId(), product);
+            pricesAtPurchase.put(
+                    itemRequest.productId(),
+                    product.getPrice().subtract(promotionService.calculateDiscount(product))
+            );
         }
 
-        Order order = orderMapper.toEntity(request, customer, productsById);
+        Order order = orderMapper.toEntity(request, customer, productsById, pricesAtPurchase);
         Order savedOrder = orderRepository.save(order);
         return orderMapper.toResponse(savedOrder);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public OrderResponse findById(Long id) {
+        Objects.requireNonNull(id, "order id must not be null");
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("order not found: " + id));
+        return orderMapper.toResponse(order);
     }
 }

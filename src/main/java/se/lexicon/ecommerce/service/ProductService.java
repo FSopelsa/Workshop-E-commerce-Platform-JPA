@@ -9,6 +9,8 @@ public interface ProductService {
 
     ProductResponse create(ProductRequest request);
 
+    ProductResponse findById(Long id);
+
     List<ProductResponse> findAll();
 
     List<ProductResponse> searchByName(String name);
