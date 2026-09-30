@@ -14,7 +14,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
+import java.math.BigDecimal;
 
 @Getter
 @Entity
@@ -35,13 +37,32 @@ public class Promotion {
     @Column(name = "end_date")
     private LocalDate endDate;
 
+    @Column(name = "discount_percentage", nullable = false, precision = 5, scale = 2)
+    private BigDecimal discountPercentage;
+
     @ManyToMany(mappedBy = "promotions", fetch = FetchType.LAZY)
     private Set<Product> products = new HashSet<>();
 
     public Promotion(String code, LocalDate startDate, LocalDate endDate) {
-        this.code = code;
-        this.startDate = startDate;
+        this(code, startDate, endDate, BigDecimal.ZERO);
+    }
+
+    public Promotion(String code, LocalDate startDate, LocalDate endDate, BigDecimal discountPercentage) {
+        this.code = Objects.requireNonNull(code, "code must not be null");
+        this.startDate = Objects.requireNonNull(startDate, "startDate must not be null");
+        if (endDate != null && endDate.isBefore(startDate)) {
+            throw new IllegalArgumentException("endDate must not be before startDate");
+        }
+        this.discountPercentage = Objects.requireNonNull(discountPercentage, "discountPercentage must not be null");
+        if (discountPercentage.signum() < 0 || discountPercentage.compareTo(new BigDecimal("100.00")) > 0) {
+            throw new IllegalArgumentException("discountPercentage must be between 0 and 100");
+        }
         this.endDate = endDate;
+    }
+
+    public boolean isActiveOn(LocalDate date) {
+        Objects.requireNonNull(date, "date must not be null");
+        return !startDate.isAfter(date) && (endDate == null || !endDate.isBefore(date));
     }
 
     public void addProduct(Product product) {
