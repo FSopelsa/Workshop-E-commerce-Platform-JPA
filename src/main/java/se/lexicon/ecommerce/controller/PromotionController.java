@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Objects;
 
 @RestController
-@RequestMapping("/api/promotions")
+@RequestMapping("/api/v1/promotions")
 public class PromotionController {
 
     private final PromotionService promotionService;

@@ -17,7 +17,7 @@ import java.net.URI;
 import java.util.Objects;
 
 @RestController
-@RequestMapping("/api/orders")
+@RequestMapping("/api/v1/orders")
 public class OrderController {
 
     private final OrderService orderService;
@@ -37,7 +37,7 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    public OrderResponse findById(@PathVariable Long id) {
-        return orderService.findById(id);
+    public ResponseEntity<OrderResponse> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.findById(id));
     }
 }

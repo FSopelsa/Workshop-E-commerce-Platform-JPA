@@ -4,7 +4,8 @@
 
 A Spring Boot and Spring Data JPA workshop project covering the customer,
 catalog, promotion, and ordering domain. Parts 1–3 are implemented, including
-the Part 3 REST API and both optional category and promotion services.
+both optional category and promotion services. Part 4 Task 1 adapts the REST
+controllers to the workshop's versioned API routes.
 
 ## Current implementation
 
@@ -47,35 +48,49 @@ the Part 3 REST API and both optional category and promotion services.
 - Both Part 3 optional services are implemented: categories can be created and
   listed; promotions can be created, listed while active, and evaluated for a
   product. If several promotions apply, the greatest discount percentage wins.
+- Part 4, Task 1: versioned customer, product, category, and order controllers
+  are implemented with validated request bodies and `ResponseEntity` responses.
+  Product searching uses `/api/v1/products/search?name=...`; the existing
+  promotion API also uses the `/api/v1` prefix.
+- Part 4, Tasks 2–3: the exception-handler review and Swagger UI setup remain.
+  The existing `ApiExceptionHandler` is retained from the earlier implementation.
+  Swagger setup must use a Spring Boot 4 compatible SpringDoc release; the
+  worksheet's `2.8.5` example targets Spring Boot 3. See the
+  [SpringDoc compatibility matrix](https://springdoc.org/#what-is-the-compatibility-matrix-of-springdoc-openapi-with-spring-boot).
 - `CustomerRequest` validates a password, but the current `Customer` entity has
   no password field or authentication feature. The mapper intentionally does
   not persist it; this workshop API has no authentication or authorization.
-- The workshop implementation is merged into and pushed to [`main`](https://github.com/FSopelsa/Workshop-E-commerce-Platform-JPA).
-- The clean Maven suite passes all 32 tests, covering Parts 1–3.
+- The completed Parts 1–3 implementation is merged into and pushed to
+  [`main`](https://github.com/FSopelsa/Workshop-E-commerce-Platform-JPA).
+  Part 4 Task 1 work is on `prel/rest-api-part4-task1`.
+- The Maven suite includes 32 tests covering Parts 1–3 and the versioned
+  Part 4 Task 1 endpoints.
 
 ## REST API
 
-The API is available under `/api` when the application is running. Request
+The API is available under `/api/v1` when the application is running. Part 4
+replaces the earlier `/api/...` paths with `/api/v1/...`. Request
 bodies for create/update operations are validated; invalid values return 400,
 duplicate resources return 409, and unknown IDs return 404.
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `POST` | `/api/customers` | Register a customer |
-| `GET` | `/api/customers/{id}` | Get a customer |
-| `PUT` | `/api/customers/{id}` | Update a customer |
-| `POST` | `/api/products` | Create a product |
-| `GET` | `/api/products` | List products; optional `?name=...` searches by name |
-| `GET` | `/api/products/{id}` | Get a product |
-| `POST` | `/api/orders` | Place an order |
-| `GET` | `/api/orders/{id}` | Get an order |
-| `POST` | `/api/categories` | Create a category |
-| `GET` | `/api/categories` | List categories |
-| `GET` | `/api/categories/{id}` | Get a category |
-| `POST` | `/api/promotions` | Create a percentage promotion for product IDs |
-| `GET` | `/api/promotions/active` | List promotions active today |
-| `GET` | `/api/promotions/{id}` | Get a promotion |
-| `GET` | `/api/promotions/products/{productId}/discount` | Preview the best active discount for a product |
+| `POST` | `/api/v1/customers` | Register a customer |
+| `GET` | `/api/v1/customers/{id}` | Get a customer |
+| `PUT` | `/api/v1/customers/{id}` | Update a customer |
+| `POST` | `/api/v1/products` | Create a product |
+| `GET` | `/api/v1/products` | List all products |
+| `GET` | `/api/v1/products/search?name=...` | Search products by name |
+| `GET` | `/api/v1/products/{id}` | Get a product |
+| `POST` | `/api/v1/orders` | Place an order |
+| `GET` | `/api/v1/orders/{id}` | Get an order |
+| `POST` | `/api/v1/categories` | Create a category |
+| `GET` | `/api/v1/categories` | List categories |
+| `GET` | `/api/v1/categories/{id}` | Get a category |
+| `POST` | `/api/v1/promotions` | Create a percentage promotion for product IDs |
+| `GET` | `/api/v1/promotions/active` | List promotions active today |
+| `GET` | `/api/v1/promotions/{id}` | Get a promotion |
+| `GET` | `/api/v1/promotions/products/{productId}/discount` | Preview the best active discount for a product |
 
 Promotions use inclusive start/end dates, with a missing end date meaning no
 expiry. The discount preview and order placement both use the highest active
@@ -161,7 +176,7 @@ Windows/JDK 26 environment.
 ```text
 src/main/java/se/lexicon/ecommerce/
 |-- EcommerceApplication.java          Spring Boot entry point
-|-- controller/                        REST controllers under /api
+|-- controller/                        REST controllers under /api/v1
 |-- domain/                            JPA entities and OrderStatus enum
 |-- dto/                               Request and response records
 |-- exception/                         Service exceptions and HTTP advice

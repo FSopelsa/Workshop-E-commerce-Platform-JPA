@@ -18,7 +18,7 @@ import java.net.URI;
 import java.util.Objects;
 
 @RestController
-@RequestMapping("/api/customers")
+@RequestMapping("/api/v1/customers")
 public class CustomerController {
 
     private final CustomerService customerService;
@@ -38,12 +38,12 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
-    public CustomerResponse findById(@PathVariable Long id) {
-        return customerService.findById(id);
+    public ResponseEntity<CustomerResponse> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(customerService.findById(id));
     }
 
     @PutMapping("/{id}")
-    public CustomerResponse update(@PathVariable Long id, @Valid @RequestBody CustomerRequest request) {
-        return customerService.update(id, request);
+    public ResponseEntity<CustomerResponse> update(@PathVariable Long id, @Valid @RequestBody CustomerRequest request) {
+        return ResponseEntity.ok(customerService.update(id, request));
     }
 }

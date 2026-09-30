@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Objects;
 
 @RestController
-@RequestMapping("/api/categories")
+@RequestMapping("/api/v1/categories")
 public class CategoryController {
 
     private final CategoryService categoryService;
@@ -38,12 +38,12 @@ public class CategoryController {
     }
 
     @GetMapping
-    public List<CategoryResponse> findAll() {
-        return categoryService.findAll();
+    public ResponseEntity<List<CategoryResponse>> findAll() {
+        return ResponseEntity.ok(categoryService.findAll());
     }
 
     @GetMapping("/{id}")
-    public CategoryResponse findById(@PathVariable Long id) {
-        return categoryService.findById(id);
+    public ResponseEntity<CategoryResponse> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(categoryService.findById(id));
     }
 }

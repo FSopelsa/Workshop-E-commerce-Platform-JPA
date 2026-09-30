@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Objects;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/api/v1/products")
 public class ProductController {
 
     private final ProductService productService;
@@ -39,14 +39,17 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<ProductResponse> findAll(@RequestParam(required = false) String name) {
-        return name == null || name.isBlank()
-                ? productService.findAll()
-                : productService.searchByName(name.trim());
+    public ResponseEntity<List<ProductResponse>> findAll() {
+        return ResponseEntity.ok(productService.findAll());
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<ProductResponse>> searchByName(@RequestParam String name) {
+        return ResponseEntity.ok(productService.searchByName(name.trim()));
     }
 
     @GetMapping("/{id}")
-    public ProductResponse findById(@PathVariable Long id) {
-        return productService.findById(id);
+    public ResponseEntity<ProductResponse> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.findById(id));
     }
 }
