@@ -22,7 +22,7 @@ In Part 3, we move away from using Entities in our repositories directly. We int
 
 ```mermaid
 graph TD
-    API[Controller Layer - Not yet implemented] --> Service[Service Layer - Part 3]
+    API[REST Controller Layer] --> Service[Service Layer - Part 3]
     Service --> Mapper[Mapper Component]
     Service --> Repo[Repository Layer - Parts 1 & 2]
     Mapper --> DTO[DTO / Form Objects]
@@ -258,14 +258,14 @@ sequenceDiagram
 
 ## Submission Checklist
 
-- [ ] **Git Branch**: Create a feature branch for Part 3 (e.g., `feature/service-layer`).
-- [ ] **DTOs & Records**: Implement the required Java Records for Requests and Responses, including validation.
-- [ ] **Mappers**: Create the required mappers as Spring components.
-- [ ] **Services**: Implement the required services using the Interface/Implementation pattern.
-- [ ] **Transactions**: Ensure that business-critical methods are transactional to handle rollbacks on failure.
-- [ ] **Exceptions**: Create and use custom exceptions for error handling.
-- [ ] **Verification**: Run the application and verify that all service methods work as expected.
-- [ ] **Commits**: Make descriptive commits for each major step.
-- [ ] **Push**: Push the branch to GitHub and provide the link.
+- [x] **Git Branch**: Part 3 was developed on `feature/service-layer` and merged into `main`.
+- [x] **DTOs & Records**: Implemented validated request and response records.
+- [x] **Mappers**: Implemented the required Spring mapper components.
+- [x] **Services**: Implemented customer, product, order, category, and promotion services using interfaces and implementations.
+- [x] **Transactions**: Business-critical writes are transactional; an integration test verifies order and item rollback together.
+- [x] **Exceptions**: Custom business exceptions and centralized HTTP error mapping are implemented.
+- [x] **Verification**: The clean Maven suite passes all 32 tests, including REST integration and transaction rollback coverage.
+- [x] **Commits**: Descriptive commits record the major implementation steps.
+- [x] **Push**: The implementation is merged into `main` on GitHub: [FSopelsa/Workshop-E-commerce-Platform-JPA](https://github.com/FSopelsa/Workshop-E-commerce-Platform-JPA).
 
 ---

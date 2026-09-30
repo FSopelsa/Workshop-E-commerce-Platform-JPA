@@ -387,14 +387,12 @@ When the application runs, create a mechanism to automatically insert initial te
 - [x] **Relationships**: The required Product/Category, Order/OrderItem, Order/Customer, and Product/Promotion mappings are implemented with the specified ownership, fetch, cascade, and orphan-removal rules.
 - [x] **Repositories**: The required and optional repository queries are implemented, including both product price sort directions, `@EntityGraph` order loading, category counts, and active-today promotion lookup.
 - [x] **Extra Task**: `CatalogDataSeeder.java` implements idempotent category and product seeding, with categories created before products.
-- [x] **Verification**: The application starts with H2 and the Maven suite passes with 13 tests, covering schema generation, mappings, queries, both N+1-safe status-loading methods, and seeding.
-- [ ] **Review follow-up commit**: The current documentation, sorting, and exact `findByStatus` test improvements are intentionally uncommitted for manual review.
-- [ ] **Review follow-up push**: The review follow-up changes still need to be committed and pushed manually. The existing Part 2 implementation is already pushed, and nothing from Part 2 has been merged into `main`.
+- [x] **Verification**: The clean full Maven suite passes with 32 tests, including schema generation, mappings, required and advanced queries, both N+1-safe status-loading methods, and seeding.
+- [x] **Review follow-up commit**: The documentation, sorting, and exact `findByStatus` test improvements were committed on the Part 2 branch.
+- [x] **Review follow-up push**: The Part 2 work, including the review follow-up, is pushed to GitHub and merged into `main`.
 
 ### Current Git boundary
 
-Before this review follow-up, `feature/jpa-part2` and its remote-tracking branch pointed to `5f6c3d5`. The current local edits are in `ProductRepository.java`, `Part2RepositoryQueryTest.java`, `README.md`, and this instruction file; they are intentionally not committed so they can be reviewed and committed manually.
-
-The Part 2 work remains on `feature/jpa-part2`; `main` still points to the Part 1 line of history.
+The Part 2 implementation and review follow-up are part of the project on `main`. The remote `feature/jpa-part2` branch remains available as the original feature branch.
 
 ---

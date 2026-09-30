@@ -35,8 +35,12 @@ the Part 3 REST API and both optional category and promotion services.
 
 ## Workshop status and scope
 
-- Part 1: customer and address persistence, including optional user profiles.
-- Part 2: domain mappings, repository queries, and seed data.
+- Part 1: required mappings and repositories, optional user profiles, and the
+  applicable advanced customer, profile, and address queries are implemented.
+  A created-after query for profiles is not applicable because `UserProfile`
+  has no creation-date field.
+- Part 2: domain mappings, bidirectional category/product access, required and
+  advanced repository queries, and idempotent catalog seeding are implemented.
 - Part 3, Tasks 1–4: DTOs, mappers, services, transaction rollback coverage,
   custom exceptions, centralized HTTP error mapping, and REST controllers are
   implemented.
@@ -46,6 +50,8 @@ the Part 3 REST API and both optional category and promotion services.
 - `CustomerRequest` validates a password, but the current `Customer` entity has
   no password field or authentication feature. The mapper intentionally does
   not persist it; this workshop API has no authentication or authorization.
+- The workshop implementation is merged into and pushed to [`main`](https://github.com/FSopelsa/Workshop-E-commerce-Platform-JPA).
+- The clean Maven suite passes all 32 tests, covering Parts 1–3.
 
 ## REST API
 
