@@ -126,6 +126,13 @@ Create a package `se.lexicon.ecommerceworkshop.controller`. Annotate each class 
 
 Implement a centralized exception handling mechanism to ensure your API returns consistent and meaningful error responses across all endpoints.
 
+Implementation complete: the existing `ApiExceptionHandler` uses
+`@RestControllerAdvice` and extends `ResponseEntityExceptionHandler`. It retains
+domain/validation error messages and handles Spring MVC errors with the same
+`application/problem+json` format. Unexpected exceptions are logged server-side
+and return a generic `500` response. Twenty-three focused MVC test cases cover
+all five controllers and the error-response contract.
+
 ---
 
 ## Task 3: API Documentation (Swagger UI)
@@ -144,14 +151,20 @@ Configure Swagger UI using SpringDoc OpenAPI to provide interactive and auto-gen
 
 ## Submission Checklist
 
-- [ ] **Git Branch**: Create a feature branch for Part 4 (e.g., `feature/rest-api`).
-- [ ] **Controllers**: Implement the required REST controllers with appropriate Spring annotations.
-- [ ] **Endpoints**: Create the required REST endpoints for CRUD operations and searching.
-- [ ] **Exception Handling**: Implement a Global Exception Handler for consistent error responses.
-- [ ] **Validation**: Ensure that all incoming requests are properly validated.
-- [ ] **Verification**: Use a REST client (like Postman or curl) to test all API endpoints and verify the correct HTTP status codes.
+Tasks 1–2 are complete on `prel/rest-api-part4-task1`. Controllers use the existing
+project package, `se.lexicon.ecommerce.controller`, and the required `/api/v1`
+routes. Task 3 remains: configure Swagger UI. Task 1 implementation is committed
+and pushed as `277a1ba`; Task 2 implementation and documentation updates remain
+uncommitted and unpushed.
+
+- [x] **Git Branch**: Created `prel/rest-api-part4-task1` for Part 4.
+- [x] **Controllers**: Implement the required REST controllers with appropriate Spring annotations.
+- [x] **Endpoints**: Create the required REST endpoints for CRUD operations and searching.
+- [x] **Exception Handling**: Centralized domain, validation, Spring MVC, and unexpected-error responses are implemented and tested.
+- [x] **Validation**: Required request DTOs use `@Valid`; integration tests cover invalid customer, product, category, and nested order input.
+- [x] **Verification (Tasks 1–2)**: All 55 tests pass with `mvn "-Dmaven.compiler.fork=true" clean test`, including 23 new error-response cases (2026-10-01). Live H2 HTTP checks covered all nine required Task 1 operations, their `200`/`201` statuses, response data, and create-operation `Location` headers (2026-09-30).
 - [ ] **Swagger UI**: Verify that the API documentation is accessible at `/swagger-ui.html`.
-- [ ] **Commits**: Make descriptive commits for each major step.
-- [ ] **Push**: Push the branch to GitHub and provide the link.
+- [ ] **Commits**: Make descriptive commits for each major step. Task 1 implementation is committed; Task 2 and documentation updates remain uncommitted, and Task 3 is pending.
+- [ ] **Push**: Push the branch to GitHub and provide the link. Task 1 implementation is pushed to `prel/rest-api-part4-task1`; Task 2 and documentation updates remain local.
 
 ---

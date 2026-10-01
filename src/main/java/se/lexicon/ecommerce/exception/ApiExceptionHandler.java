@@ -1,19 +1,24 @@
 package se.lexicon.ecommerce.exception;
 
+import org.springframework.beans.TypeMismatchException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
-public class ApiExceptionHandler {
+public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ProblemDetail handleResourceNotFound(ResourceNotFoundException exception) {
@@ -30,8 +35,11 @@ public class ApiExceptionHandler {
         return problemDetail(HttpStatus.BAD_REQUEST, "Invalid request", exception.getMessage());
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ProblemDetail handleValidation(MethodArgumentNotValidException exception) {
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException exception, HttpHeaders headers,
+            HttpStatusCode status, WebRequest request
+    ) {
         String detail = exception.getBindingResult().getAllErrors().stream()
                 .map(error -> {
                     String message = Objects.requireNonNullElse(error.getDefaultMessage(), "is invalid");
@@ -45,15 +53,38 @@ public class ApiExceptionHandler {
         if (detail.isBlank()) {
             detail = "Request validation failed";
         }
-        return problemDetail(HttpStatus.BAD_REQUEST, "Validation failed", detail);
+        ProblemDetail problem = problemDetail(status, "Validation failed", detail);
+        return handleExceptionInternal(exception, problem, headers, status, request);
     }
 
-    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})
-    public ProblemDetail handleMalformedRequest(Exception exception) {
-        return problemDetail(HttpStatus.BAD_REQUEST, "Malformed request", "Request values could not be read");
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException exception, HttpHeaders headers,
+            HttpStatusCode status, WebRequest request
+    ) {
+        return handleExceptionInternal(exception, malformedRequest(status), headers, status, request);
     }
 
-    private ProblemDetail problemDetail(HttpStatus status, String title, String detail) {
+    @Override
+    protected ResponseEntity<Object> handleTypeMismatch(
+            TypeMismatchException exception, HttpHeaders headers,
+            HttpStatusCode status, WebRequest request
+    ) {
+        return handleExceptionInternal(exception, malformedRequest(status), headers, status, request);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ProblemDetail handleUnexpectedException(Exception exception) {
+        logger.error("Unexpected error while processing an API request", exception);
+        return problemDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error",
+                "An unexpected error occurred. Please try again later.");
+    }
+
+    private ProblemDetail malformedRequest(HttpStatusCode status) {
+        return problemDetail(status, "Malformed request", "Request values could not be read");
+    }
+
+    private ProblemDetail problemDetail(HttpStatusCode status, String title, String detail) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, detail);
         problem.setTitle(title);
         return problem;

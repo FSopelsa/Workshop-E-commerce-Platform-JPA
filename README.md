@@ -4,8 +4,8 @@
 
 A Spring Boot and Spring Data JPA workshop project covering the customer,
 catalog, promotion, and ordering domain. Parts 1–3 are implemented, including
-both optional category and promotion services. Part 4 Task 1 adapts the REST
-controllers to the workshop's versioned API routes.
+both optional category and promotion services. Part 4 Tasks 1–2 provide
+versioned REST controllers and centralized HTTP error handling.
 
 ## Current implementation
 
@@ -25,7 +25,10 @@ controllers to the workshop's versioned API routes.
   Create operations return `201 Created` with a `Location` header.
 - `ApiExceptionHandler` returns RFC 9457-style `ProblemDetail` responses:
   `400 Bad Request` for invalid input, `404 Not Found` for missing resources,
-  and `409 Conflict` for duplicates.
+  and `409 Conflict` for duplicates. Spring MVC errors also use this format,
+  including `405 Method Not Allowed` and `415 Unsupported Media Type`.
+- Unexpected failures are logged server-side and return a generic
+  `500 Internal Server Error` response without exception messages or stack traces.
 - Transactional customer registration and updates, product/category/promotion
   creation, and order placement. Orders use the highest-percentage promotion
   active for each product and persist the resulting price at purchase time.
@@ -52,8 +55,12 @@ controllers to the workshop's versioned API routes.
   are implemented with validated request bodies and `ResponseEntity` responses.
   Product searching uses `/api/v1/products/search?name=...`; the existing
   promotion API also uses the `/api/v1` prefix.
-- Part 4, Tasks 2–3: the exception-handler review and Swagger UI setup remain.
-  The existing `ApiExceptionHandler` is retained from the earlier implementation.
+- Part 4, Task 2: `ApiExceptionHandler` extends `ResponseEntityExceptionHandler`
+  to handle Spring MVC errors consistently alongside domain exceptions and
+  validation errors. Tests cover all five controllers, missing search parameters,
+  malformed input, unknown routes, unsupported methods/content types, and safe
+  unexpected-error responses. See [Spring MVC error responses](https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-ann-rest-exceptions.html).
+- Part 4, Task 3: Swagger UI setup remains.
   Swagger setup must use a Spring Boot 4 compatible SpringDoc release; the
   worksheet's `2.8.5` example targets Spring Boot 3. See the
   [SpringDoc compatibility matrix](https://springdoc.org/#what-is-the-compatibility-matrix-of-springdoc-openapi-with-spring-boot).
@@ -62,9 +69,13 @@ controllers to the workshop's versioned API routes.
   not persist it; this workshop API has no authentication or authorization.
 - The completed Parts 1–3 implementation is merged into and pushed to
   [`main`](https://github.com/FSopelsa/Workshop-E-commerce-Platform-JPA).
-  Part 4 Task 1 work is on `prel/rest-api-part4-task1`.
-- The Maven suite includes 32 tests covering Parts 1–3 and the versioned
-  Part 4 Task 1 endpoints.
+  Part 4 work continues on `prel/rest-api-part4-task1`; Task 2 changes remain
+  uncommitted and unpushed.
+- Latest clean full-suite verification (2026-10-01): all 55 Maven tests pass,
+  covering Parts 1–3, the versioned Part 4 endpoints, and 23 new HTTP error cases.
+- Live H2 verification (2026-09-30): the app started successfully and all nine
+  required Task 1 operations passed HTTP checks, including response data,
+  `200`/`201` status codes, and create-operation `Location` headers.
 
 ## REST API
 
@@ -96,6 +107,32 @@ Promotions use inclusive start/end dates, with a missing end date meaning no
 expiry. The discount preview and order placement both use the highest active
 percentage for the product. For example, create a promotion with a JSON body
 like `{"code":"SUMMER15","startDate":"2026-09-01","endDate":"2026-09-30","discountPercentage":15,"productIds":[1]}`.
+
+### Error responses
+
+Errors use `application/problem+json` with `status`, `title`, `detail`, and
+`instance` (the request path). For example, requesting a missing product:
+
+```json
+{
+  "status": 404,
+  "title": "Resource not found",
+  "detail": "product not found: 42",
+  "instance": "/api/v1/products/42"
+}
+```
+
+The default problem type is `about:blank`; its optional `type` field may be
+omitted from JSON, as defined by [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457.html#name-type).
+
+| Status | When it is returned |
+| --- | --- |
+| `400` | Invalid request fields or service rules, malformed/missing JSON, invalid IDs, or missing required query parameters |
+| `404` | A resource or API route does not exist |
+| `409` | A customer email, category name, or promotion code already exists |
+| `405` | An unsupported HTTP method; the `Allow` header lists supported methods |
+| `415` | An unsupported request content type |
+| `500` | An unexpected failure; internal details are logged, not returned to clients |
 
 ## Run locally
 
@@ -156,12 +193,13 @@ Run a clean build and test suite:
 mvn "-Dmaven.compiler.fork=true" clean test
 ```
 
-Run focused service, transaction rollback, or REST integration tests:
+Run focused service, transaction rollback, REST integration, or error-response tests:
 
 ```powershell
 mvn "-Dmaven.compiler.fork=true" "-Dtest=ServiceLayerTest" test
 mvn "-Dmaven.compiler.fork=true" "-Dtest=OrderServiceTransactionTest" test
 mvn "-Dmaven.compiler.fork=true" "-Dtest=CommerceApiIntegrationTest" test
+mvn "-Dmaven.compiler.fork=true" "-Dtest=ApiExceptionHandlerMvcTest" test
 ```
 
 Tests use the `test` profile and an H2 database configured with schema
