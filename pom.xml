@@ -19,7 +19,12 @@
 
     <properties>
         <java.version>26</java.version>
+        <!-- Security fixes newer than Spring Boot 4.1.1's managed versions. -->
+        <jackson-2-bom.version>2.21.7</jackson-2-bom.version>
+        <jackson-bom.version>3.1.7</jackson-bom.version>
         <logback.version>1.6.5</logback.version>
+        <mysql.version>26.7.0</mysql.version>
+        <tomcat.version>11.0.26</tomcat.version>
         <springdoc.version>3.1.1</springdoc.version>
     </properties>
 
@@ -30,7 +35,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webmvc</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -78,7 +78,8 @@ Swagger UI documentation.
   and pushed through `a2bfa40`. Task 3 changes remain uncommitted and unpushed.
 - Latest clean full-suite verification (2026-10-02): all 59 Maven tests pass,
   covering Parts 1–3, the versioned Part 4 endpoints, 23 HTTP error cases, and
-  four OpenAPI/Swagger integration tests.
+  four OpenAPI/Swagger integration tests. The suite also passes with the
+  security dependency overrides listed below.
 - Live H2 verification (2026-09-30): the app started successfully and all nine
   required Task 1 operations passed HTTP checks, including response data,
   `200`/`201` status codes, and create-operation `Location` headers.
@@ -169,7 +170,17 @@ disable it with `springdoc.api-docs.enabled=false` and
 
 - JDK 26 (the Maven compiler targets Java 26).
 - Apache Maven installed and available as `mvn` in PowerShell.
-- MySQL is only needed when using the optional `mysql` profile.
+- MySQL 8.4 or later is only needed when using the optional `mysql` profile.
+
+The POM overrides Spring Boot 4.1.1's managed versions with Jackson 2 `2.21.7`,
+Jackson 3 `3.1.7`, Tomcat `11.0.26`, MySQL Connector/J `26.7.0`, and Logback
+`1.6.5` to include published security fixes. Jackson BOMs keep each Jackson
+family aligned; Tomcat and Logback version properties align their modules.
+Review these overrides when upgrading the Spring Boot parent. See the
+[Jackson advisories](https://github.com/FasterXML/jackson-databind/security/advisories/GHSA-wv8q-qhhj-9h54),
+[Tomcat advisories](https://tomcat.apache.org/security-11.html), and
+[Connector/J release notes](https://dev.mysql.com/doc/relnotes/connector-j/en/news-26-7-0.html).
+The automated suite uses H2; a live MySQL connection was not verified.
 
 The default Spring profile is `h2`. It uses an in-memory H2 database, creates
 the schema on startup, and seeds sample catalog data. Start the app from the
