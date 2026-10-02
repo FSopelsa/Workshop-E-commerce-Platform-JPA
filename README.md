@@ -4,8 +4,9 @@
 
 A Spring Boot and Spring Data JPA workshop project covering the customer,
 catalog, promotion, and ordering domain. Parts 1–3 are implemented, including
-both optional category and promotion services. Part 4 Tasks 1–2 provide
-versioned REST controllers and centralized HTTP error handling.
+both optional category and promotion services. Part 4 Tasks 1–3 provide
+versioned REST controllers, centralized HTTP error handling, and interactive
+Swagger UI documentation.
 
 ## Current implementation
 
@@ -29,6 +30,10 @@ versioned REST controllers and centralized HTTP error handling.
   including `405 Method Not Allowed` and `415 Unsupported Media Type`.
 - Unexpected failures are logged server-side and return a generic
   `500 Internal Server Error` response without exception messages or stack traces.
+- SpringDoc OpenAPI generates documentation for all 16 API operations, grouped
+  by resource, with request examples, validation constraints, response schemas,
+  create-operation `Location` headers, and reusable error responses. Swagger UI
+  supports interactive requests through **Try it out**.
 - Transactional customer registration and updates, product/category/promotion
   creation, and order placement. Orders use the highest-percentage promotion
   active for each product and persist the resulting price at purchase time.
@@ -60,22 +65,25 @@ versioned REST controllers and centralized HTTP error handling.
   validation errors. Tests cover all five controllers, missing search parameters,
   malformed input, unknown routes, unsupported methods/content types, and safe
   unexpected-error responses. See [Spring MVC error responses](https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-ann-rest-exceptions.html).
-- Part 4, Task 3: Swagger UI setup remains.
-  Swagger setup must use a Spring Boot 4 compatible SpringDoc release; the
-  worksheet's `2.8.5` example targets Spring Boot 3. See the
+- Part 4, Task 3: Swagger UI and generated OpenAPI documentation are implemented
+  using SpringDoc `3.1.1` for Spring Boot 4. The worksheet's original `2.8.5`
+  example targets Spring Boot 3. See the
   [SpringDoc compatibility matrix](https://springdoc.org/#what-is-the-compatibility-matrix-of-springdoc-openapi-with-spring-boot).
 - `CustomerRequest` validates a password, but the current `Customer` entity has
   no password field or authentication feature. The mapper intentionally does
   not persist it; this workshop API has no authentication or authorization.
 - The completed Parts 1–3 implementation is merged into and pushed to
   [`main`](https://github.com/FSopelsa/Workshop-E-commerce-Platform-JPA).
-  Part 4 work continues on `prel/rest-api-part4-task1`; Task 2 changes remain
-  uncommitted and unpushed.
-- Latest clean full-suite verification (2026-10-01): all 55 Maven tests pass,
-  covering Parts 1–3, the versioned Part 4 endpoints, and 23 new HTTP error cases.
+  Part 4 work continues on `prel/rest-api-part4-task1`; Tasks 1–2 are committed
+  and pushed through `a2bfa40`. Task 3 changes remain uncommitted and unpushed.
+- Latest clean full-suite verification (2026-10-02): all 59 Maven tests pass,
+  covering Parts 1–3, the versioned Part 4 endpoints, 23 HTTP error cases, and
+  four OpenAPI/Swagger integration tests.
 - Live H2 verification (2026-09-30): the app started successfully and all nine
   required Task 1 operations passed HTTP checks, including response data,
   `200`/`201` status codes, and create-operation `Location` headers.
+- Live Swagger verification (2026-10-02): the UI rendered successfully and
+  **Try it out** returned `200` with the seeded products from `/api/v1/products`.
 
 ## REST API
 
@@ -133,6 +141,27 @@ omitted from JSON, as defined by [RFC 9457](https://www.rfc-editor.org/rfc/rfc94
 | `405` | An unsupported HTTP method; the `Allow` header lists supported methods |
 | `415` | An unsupported request content type |
 | `500` | An unexpected failure; internal details are logged, not returned to clients |
+
+### Interactive API documentation
+
+After starting the app, open [Swagger UI](http://localhost:8080/swagger-ui.html).
+The generated [OpenAPI JSON](http://localhost:8080/v3/api-docs) is also available
+for API tooling. These links use the default port `8080`.
+
+1. Expand an operation, click **Try it out**, enter its parameters or JSON body,
+   then click **Execute**.
+2. Inspect the response status, body, headers, and generated cURL command.
+3. Start with `GET /api/v1/categories` and `GET /api/v1/products` to find usable
+   IDs. Register a customer, then use the returned customer ID and product IDs
+   when placing an order. Example IDs such as `1` are illustrative.
+
+POST and PUT operations modify the running database. The default H2 database
+resets on restart. Customer passwords must contain 8–255 characters; they are
+validated but not stored, and this workshop has no authentication.
+
+Documentation is enabled for this local workshop. For a production deployment,
+disable it with `springdoc.api-docs.enabled=false` and
+`springdoc.swagger-ui.enabled=false` unless deliberately exposing it.
 
 ## Run locally
 
@@ -193,19 +222,22 @@ Run a clean build and test suite:
 mvn "-Dmaven.compiler.fork=true" clean test
 ```
 
-Run focused service, transaction rollback, REST integration, or error-response tests:
+Run focused service, transaction rollback, REST integration, error-response,
+or API documentation tests:
 
 ```powershell
 mvn "-Dmaven.compiler.fork=true" "-Dtest=ServiceLayerTest" test
 mvn "-Dmaven.compiler.fork=true" "-Dtest=OrderServiceTransactionTest" test
 mvn "-Dmaven.compiler.fork=true" "-Dtest=CommerceApiIntegrationTest" test
 mvn "-Dmaven.compiler.fork=true" "-Dtest=ApiExceptionHandlerMvcTest" test
+mvn "-Dmaven.compiler.fork=true" "-Dtest=OpenApiDocumentationIntegrationTest" test
 ```
 
 Tests use the `test` profile and an H2 database configured with schema
 creation/drop. The suite covers entity mappings, repositories and queries,
-DTO validation, mapper behavior, service rules, seeding, HTTP workflows, and
-transaction rollback. `.mvn/maven.config` points Maven's dependency cache to
+DTO validation, mapper behavior, service rules, seeding, HTTP workflows,
+transaction rollback, generated OpenAPI contracts, and Swagger UI assets.
+`.mvn/maven.config` points Maven's dependency cache to
 `.mvn/repository`; the compiler fork option is included above for the current
 Windows/JDK 26 environment.
 
@@ -214,6 +246,7 @@ Windows/JDK 26 environment.
 ```text
 src/main/java/se/lexicon/ecommerce/
 |-- EcommerceApplication.java          Spring Boot entry point
+|-- config/                            OpenAPI metadata and shared error schemas
 |-- controller/                        REST controllers under /api/v1
 |-- domain/                            JPA entities and OrderStatus enum
 |-- dto/                               Request and response records
@@ -230,7 +263,7 @@ src/main/resources/
 
 src/test/java/se/lexicon/ecommerce/
 |-- domain/                            Entity mapping tests
-|-- controller/                        REST API integration tests
+|-- controller/                        REST API and OpenAPI integration tests
 |-- dto/                               DTO validation tests
 |-- exception/                         HTTP exception-mapping tests
 |-- mapper/                            Mapper tests

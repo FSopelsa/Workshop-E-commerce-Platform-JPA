@@ -5,3 +5,13 @@ spring:
     default: h2
   jpa:
     open-in-view: false
+
+springdoc:
+  packages-to-scan: se.lexicon.ecommerce.controller
+  paths-to-match: /api/v1/**
+  override-with-generic-response: false
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    disable-swagger-default-url: true

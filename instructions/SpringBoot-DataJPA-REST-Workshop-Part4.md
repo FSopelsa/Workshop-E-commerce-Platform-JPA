@@ -22,6 +22,8 @@ This section continues from **Part 3**. Before implementing the controller layer
           <version>2.8.5</version>
       </dependency>
       ```
+      Compatibility note: the example above targets Spring Boot 3. This project
+      uses Spring Boot 4 and implements Task 3 with SpringDoc `3.1.1` instead.
 3. **Verify App Start**: Run the application and ensure no errors are present.
 
 ---
@@ -139,6 +141,14 @@ all five controllers and the error-response contract.
 
 Configure Swagger UI using SpringDoc OpenAPI to provide interactive and auto-generated documentation for your REST API, making it easy to test and explore.
 
+Implementation complete: SpringDoc `3.1.1` generates `/v3/api-docs`, and Swagger
+UI is available at `/swagger-ui.html` while the app is running. All five resource
+groups and 16 API operations include summaries, request examples, validation
+constraints, success schemas, create-operation `Location` headers, and shared
+`ProblemDetail` error responses. Four integration tests verify the generated
+contract and Swagger UI assets. Live browser verification confirmed the UI
+renders and **Try it out** returns `200` with seeded products (2026-10-02).
+
 ---
 
 ## Learning Goals
@@ -151,20 +161,20 @@ Configure Swagger UI using SpringDoc OpenAPI to provide interactive and auto-gen
 
 ## Submission Checklist
 
-Tasks 1–2 are complete on `prel/rest-api-part4-task1`. Controllers use the existing
+Tasks 1–3 are implemented and verified on `prel/rest-api-part4-task1`. Controllers use the existing
 project package, `se.lexicon.ecommerce.controller`, and the required `/api/v1`
-routes. Task 3 remains: configure Swagger UI. Task 1 implementation is committed
-and pushed as `277a1ba`; Task 2 implementation and documentation updates remain
-uncommitted and unpushed.
+routes. Task 1 implementation is committed and pushed as `277a1ba`; Task 2 is
+committed and pushed as `a2bfa40`. Task 3 implementation and its documentation
+updates remain uncommitted and unpushed for review.
 
 - [x] **Git Branch**: Created `prel/rest-api-part4-task1` for Part 4.
 - [x] **Controllers**: Implement the required REST controllers with appropriate Spring annotations.
 - [x] **Endpoints**: Create the required REST endpoints for CRUD operations and searching.
 - [x] **Exception Handling**: Centralized domain, validation, Spring MVC, and unexpected-error responses are implemented and tested.
 - [x] **Validation**: Required request DTOs use `@Valid`; integration tests cover invalid customer, product, category, and nested order input.
-- [x] **Verification (Tasks 1–2)**: All 55 tests pass with `mvn "-Dmaven.compiler.fork=true" clean test`, including 23 new error-response cases (2026-10-01). Live H2 HTTP checks covered all nine required Task 1 operations, their `200`/`201` statuses, response data, and create-operation `Location` headers (2026-09-30).
-- [ ] **Swagger UI**: Verify that the API documentation is accessible at `/swagger-ui.html`.
-- [ ] **Commits**: Make descriptive commits for each major step. Task 1 implementation is committed; Task 2 and documentation updates remain uncommitted, and Task 3 is pending.
-- [ ] **Push**: Push the branch to GitHub and provide the link. Task 1 implementation is pushed to `prel/rest-api-part4-task1`; Task 2 and documentation updates remain local.
+- [x] **Verification (Tasks 1–3)**: All 59 tests pass with `mvn "-Dmaven.compiler.fork=true" clean test`, including 23 error-response cases and four OpenAPI/Swagger tests (2026-10-02). Live H2 HTTP checks covered all nine required Task 1 operations, their `200`/`201` statuses, response data, and create-operation `Location` headers (2026-09-30).
+- [x] **Swagger UI**: Documentation is accessible at `/swagger-ui.html`; live **Try it out** verification returned `200` from the product-list endpoint (2026-10-02).
+- [ ] **Commits**: Make descriptive commits for each major step. Tasks 1–2 are committed; Task 3 and its documentation updates remain uncommitted.
+- [ ] **Push**: Push the branch to GitHub and provide the link. Tasks 1–2 are pushed to `prel/rest-api-part4-task1`; Task 3 and its documentation updates remain local.
 
 ---

@@ -1,5 +1,11 @@
 package se.lexicon.ecommerce.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +24,8 @@ import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/orders")
+@Tag(name = "Orders", description = "Place orders and retrieve their captured purchase prices")
+@ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
 public class OrderController {
 
     private final OrderService orderService;
@@ -27,6 +35,14 @@ public class OrderController {
     }
 
     @PostMapping
+    @Operation(summary = "Place an order", description = "Captures current prices with the best active promotion applied")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Order placed", useReturnTypeSchema = true,
+                    headers = @Header(name = "Location", description = "URL of the placed order",
+                            schema = @Schema(type = "string", format = "uri"))),
+            @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+            @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound")
+    })
     public ResponseEntity<OrderResponse> placeOrder(@Valid @RequestBody OrderRequest request) {
         OrderResponse response = orderService.placeOrder(request);
         URI location = ServletUriComponentsBuilder.fromCurrentRequestUri()
@@ -37,6 +53,12 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get an order by ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Order found", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+            @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound")
+    })
     public ResponseEntity<OrderResponse> findById(@PathVariable Long id) {
         return ResponseEntity.ok(orderService.findById(id));
     }
